@@ -275,6 +275,7 @@ class AvgSensitivity(BatchedPerturbationMetric):
         y_batch: np.ndarray,
         a_batch: np.ndarray,
         s_batch: np.ndarray,
+        aggregate_result: bool = False
     ) -> np.ndarray:
         """
         Evaluates model and attributes on a single data batch and returns the batched evaluation result.
@@ -368,8 +369,10 @@ class AvgSensitivity(BatchedPerturbationMetric):
                 denominator = self.norm_denominator(a=x_batch[instance_id].flatten())
                 sensitivities_norm = numerator / denominator
                 similarities[instance_id, step_id] = sensitivities_norm
-        mean_func = np.mean if self.return_nan_when_prediction_changes else np.nanmean
-        return mean_func(similarities, axis=1)
+        if aggregate_result:
+            mean_func = np.mean if self.return_nan_when_prediction_changes else np.nanmean
+            return mean_func(similarities, axis=1)
+        return similarities
 
     def custom_preprocess(
         self,
